@@ -1,5 +1,6 @@
 package CSModule2.controller;
 
+import CSModule2.account.AccountManage;
 import CSModule2.sevice.Question;
 
 import java.io.*;
@@ -10,32 +11,132 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 public class Main {
-    static Scanner scan = new Scanner(System.in);
-    public static void main(String[] args) {
-        int choose;
+    static Scanner scanner = new Scanner(System.in);
+
+    public static void adminMenu(AccountManage accountManage, Question question) {
+        int choice = -1;
 
         do {
-            showMenu();
-            choose = Integer.parseInt(scan.nextLine());
 
-            switch(choose) {
+
+            System.out.println("ADMIN");
+            System.out.println("1.Xóa tài khoản");
+            System.out.println("2. Thêm câu hỏi");
+            System.out.println("3. Hiển thị tất cả tài khoản");
+            System.out.println("4. Xóa tất cả tài khoản");
+            System.out.println("0.Thoát");
+
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                continue;
+            }
+            switch (choice) {
                 case 1:
-                    inputQuestions();
+                    accountManage.deleteAccount();
                     break;
                 case 2:
-                    showGame();
+                    question.input();
                     break;
                 case 3:
-                    System.out.println("Thoat Game!!!");
+                    accountManage.displayAllAccount();
                     break;
-                default:
-                    System.out.println("Nhap sai!!!");
+                case 4:
+                    accountManage.deleteAccount();
                     break;
+                case 0:
+                    choice = 0;
+                    break;
+
+
             }
-        } while(choose != 3);
+
+
+        } while (choice != 0);
     }
 
-    static void showGame() {
+
+    public static void userMenu(AccountManage accountManage, Question question) {
+        int choice = -1;
+        do {
+            System.out.println("User");
+            System.out.println("1.Chơi game:");
+            System.out.println("2.Thêm tài khoản của bạn");
+            System.out.println("3. Thoát");
+            System.out.println("Nhập lựa chọn của bạn");
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                continue;
+            }
+            switch (choice) {
+                case 1:
+                    showGame();
+                    break;
+                case 2:
+                    accountManage.updateAccount();
+                    break;
+                case 3:
+                    choice = 0;
+                    break;
+                default:
+                    System.out.println("Lựa chọn không đúng");
+                    break;
+            }
+        } while (choice != 0);
+    }
+
+    public static void main(String[] args) {
+        AccountManage accountManage = new AccountManage();
+        Question question = new Question();
+        int choice = -1;
+        do {
+            System.out.println("-------- MENU ---------");
+            System.out.println("1. Đăng kí");
+            System.out.println("2. Đăng nhập");
+            System.out.println("3. Quên mật khẩu");
+            System.out.println("0. Thoát");
+            System.out.println("Mời nhập lựa chọn :");
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.err.println("Error " + e.getMessage());
+                continue;
+            }
+            switch (choice) {
+                case 1:
+                    accountManage.createAccount();
+                    break;
+                case 2:
+                    String userName = accountManage.login();
+                    if (userName != null) {
+                        if (userName.equals("chu123")) {
+                            adminMenu(accountManage, question);
+                        } else userMenu(accountManage, question);
+                    }
+                    break;
+                case 3:
+                    accountManage.findPassWord();
+                    break;
+                case 0:
+                    System.exit(0);
+                default:
+                    System.out.println("Lựa chọn không phù hợp");
+                    break;
+            }
+
+        } while (choice != 0);
+
+
+    }
+
+    int choose;
+
+
+    public static void showGame() {
         FileInputStream fis = null;
         ObjectInputStream ois = null;
 
@@ -45,14 +146,14 @@ public class Main {
             fis = new FileInputStream("C:\\Users\\Admin BVCN88 02\\IdeaProjects\\Module2\\src\\CSModule2\\data\\question.txt");
             ois = new ObjectInputStream(fis);
 
-            for(;;) {
+            for (; ; ) {
                 Object obj;
                 try {
                     obj = ois.readObject();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     obj = null;
                 }
-                if(obj == null) {
+                if (obj == null) {
                     break;
                 }
                 questions.add((Question) obj);
@@ -60,7 +161,7 @@ public class Main {
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(ois != null) {
+            if (ois != null) {
                 try {
                     ois.close();
                 } catch (IOException ex) {
@@ -68,7 +169,7 @@ public class Main {
                 }
             }
 
-            if(fis != null) {
+            if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException ex) {
@@ -81,7 +182,7 @@ public class Main {
         int total = questions.size();
 
         //sinh ngau nhien 15 cau hoi.
-        if(questions.size() > 15) {
+        if (questions.size() > 15) {
             List<Question> testList = new ArrayList<>();
             Random random = new Random();
 
@@ -95,8 +196,8 @@ public class Main {
 
         for (Question question : questions) {
             question.showQuestion();
-            int result = Integer.parseInt(scan.nextLine());
-            if(question.checkResult(result)) {
+            int result = Integer.parseInt(scanner.nextLine());
+            if (question.checkResult(result)) {
                 correct++;
             }
         }
@@ -112,22 +213,22 @@ public class Main {
             fos = new FileOutputStream("C:\\Users\\Admin BVCN88 02\\IdeaProjects\\Module2\\src\\CSModule2\\data\\question.txt", true);
             oos = new ObjectOutputStream(fos);
 
-            for(;;) {
+            for (; ; ) {
                 Question question = new Question();
                 question.input();
 
                 oos.writeObject(question);
 
                 System.out.println("Tiếp tu nhập câu hỏi Có/Không");
-                String option = scan.nextLine();
-                if(option.equalsIgnoreCase("No")) {
+                String option = scanner.nextLine();
+                if (option.equalsIgnoreCase("No")) {
                     break;
                 }
             }
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(oos != null) {
+            if (oos != null) {
                 try {
                     oos.close();
                 } catch (IOException ex) {
@@ -135,7 +236,7 @@ public class Main {
                 }
             }
 
-            if(fos != null) {
+            if (fos != null) {
                 try {
                     fos.close();
                 } catch (IOException ex) {
@@ -144,11 +245,7 @@ public class Main {
             }
         }
     }
-
-    static void showMenu() {
-        System.out.println("MENU");
-        System.out.println("1. Nhập câu hỏi:");
-        System.out.println("2. Game");
-        System.out.println("3. Thoat");
-    }
 }
+
+
+

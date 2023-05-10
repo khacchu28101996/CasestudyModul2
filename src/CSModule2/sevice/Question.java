@@ -14,18 +14,26 @@ public class Question implements Serializable {
     public Question() {
     }
 
-    public void input() throws NumberFormatException{
+    public void input() throws NumberFormatException {
         Scanner scan = new Scanner(System.in);
 
         System.out.println("Nhập câu hỏi ");
         title = scan.nextLine();
 
         System.out.println("Nhập lựa chọn: ");
-
-        for (int index=1;index<=4 ;++index ) {
+        int index = 1;
+        for (; ; ) {
             System.out.format("\nOption %d: ", index++);
             String option = scan.nextLine();
             options.add(option);
+
+            System.out.println("Tiếp tục nhập lựa chọn hay không Yes/No: ");
+            option = scan.nextLine();
+
+            if (option.equalsIgnoreCase("No")) {
+                break;
+            }
+
 
         }
         System.out.println("Nhập đáp án đúng: ");
